@@ -1,1 +1,1 @@
-rs.initiate({_id: "shard-rs-0", version: 1, members: [ { _id: 0, host : "shard-0:27017" } ] })
+rs.initiate({_id: "shard-rs0", version: 1, members: [ { _id: 0, host : "shard-rs0-0:27017" } ] })

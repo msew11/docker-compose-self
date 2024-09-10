@@ -5,55 +5,56 @@ services:
       context: mongodb-build
       args:
         - MONGO_VER=${MONGO_VER}
-    container_name: config-0
+    container_name: ${CONFIG_0}
     volumes:
       - ./scripts:/scripts
-      - ${MONGO_PATH}/config-0/db:/data/db
-      - ${MONGO_PATH}/config-0/configdb:/data/configdb
+      - ${MONGO_PATH}/${CONFIG_0}/db:/data/db
+      - ${MONGO_PATH}/${CONFIG_0}/configdb:/data/configdb
     ports:
       - 27018:27017
-    restart: always
-    entrypoint: ["mongod", "--port", "27017", "--configsvr", "--replSet", "config-rs", "--bind_ip_all", "--keyFile", "/data/mongodb-keyfile"]
-  shard-0:
+    # restart: always
+    command: mongod --port 27017 --configsvr --replSet ${CONFIG_RS} --bind_ip 0.0.0.0 --keyFile /data/mongodb-keyfile
+    # entrypoint: ["mongod", "--port", "27017", "--configsvr", "--replSet", "config-rs", "--bind_ip", "0.0.0.0", "--keyFile", "/data/mongodb-keyfile"]
+  shard-rs0-0:
     image: my-mongo:${MONGO_VER}
     depends_on:
-      - config-0
-    links:
-      - config-0
-    container_name: shard-0
+      - ${CONFIG_0}
+    container_name: ${SHARD_RS0_0}
     volumes:
       - ./scripts:/scripts
-      - ${MONGO_PATH}/shard-0/db:/data/db
-      - ${MONGO_PATH}/shard-0/configdb:/data/configdb
+      - ${MONGO_PATH}/${SHARD_RS0_0}/db:/data/db
+      - ${MONGO_PATH}/${SHARD_RS0_0}/configdb:/data/configdb
     ports:
       - 27019:27017
-    restart: always
-    entrypoint: ["mongod", "--port", "27017", "--shardsvr", "--replSet", "shard-rs-0", "--bind_ip_all", "--keyFile", "/data/mongodb-keyfile"]
-  shard-1:
+    # restart: always
+    command: mongod --port 27017 --shardsvr --replSet ${SHARD_RS0} --bind_ip 0.0.0.0 --keyFile /data/mongodb-keyfile
+    # entrypoint: ["mongod", "--port", "27017", "--shardsvr", "--replSet", "shard-rs0", "--bind_ip", "0.0.0.0", "--keyFile", "/data/mongodb-keyfile"]
+  shard-rs1-0:
     image: my-mongo:${MONGO_VER}
     depends_on:
-      - config-0
-    links:
-      - config-0
-    container_name: shard-1
+      - ${CONFIG_0}
+    container_name: shard-rs1-0
     volumes:
       - ./scripts:/scripts
-      - ${MONGO_PATH}/shard-1/db:/data/db
-      - ${MONGO_PATH}/shard-1/configdb:/data/configdb
+      - ${MONGO_PATH}/${SHARD_RS1_0}/db:/data/db
+      - ${MONGO_PATH}/${SHARD_RS1_0}/configdb:/data/configdb
     ports:
       - 27020:27017
-    restart: always
-    entrypoint: ["mongod", "--port", "27017", "--shardsvr", "--replSet", "shard-rs-1", "--bind_ip_all", "--keyFile", "/data/mongodb-keyfile"]
+    # restart: always
+    command: mongod --port 27017 --shardsvr --replSet ${SHARD_RS1} --bind_ip 0.0.0.0 --keyFile /data/mongodb-keyfile
+    # entrypoint: ["mongod", "--port", "27017", "--shardsvr", "--replSet", "shard-rs1", "--bind_ip", "0.0.0.0", "--keyFile", "/data/mongodb-keyfile"]
   router-0:
     image: my-mongo:${MONGO_VER}
     depends_on:
-      - config-0
-    container_name: router-0
+      - ${SHARD_RS0_0}
+      - ${SHARD_RS1_0}
+    container_name: ${ROUTER_0}
     volumes:
       - ./scripts:/scripts
-      - ${MONGO_PATH}/router-0/db:/data/db
-      - ${MONGO_PATH}/router-0/configdb:/data/configdb
+      - ${MONGO_PATH}/${ROUTER_0}/db:/data/db
+      - ${MONGO_PATH}/${ROUTER_0}/configdb:/data/configdb
     ports:
       - 27017:27017
-    restart: always
-    entrypoint: ["mongos", "--port", "27017", "--configdb", "config-rs/config-0:27017", "--bind_ip_all", "--keyFile", "/data/mongodb-keyfile"]
+    # restart: always
+    command: mongos --port 27017 --configdb ${CONFIG_RS}/${CONFIG_0}:27017 --bind_ip 0.0.0.0 --keyFile /data/mongodb-keyfile
+    # entrypoint: ["mongos", "--port", "27017", "--configdb", "config-rs/config-0:27017", "--bind_ip", "0.0.0.0", "--keyFile", "/data/mongodb-keyfile"]
