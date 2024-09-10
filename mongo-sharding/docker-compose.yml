@@ -8,6 +8,7 @@ services:
     volumes:
       - ./scripts:/scripts
       - ${MONGO_PATH}/shard-0/db:/data/db
+      - ${MONGO_PATH}/shard-0/configdb:/data/configdb
     ports:
       - 27017:27017
     entrypoint: ["mongod", "--port", "27017", "--shardsvr", "--replSet", "shard-rs-0", "--bind_ip_all"]
@@ -20,6 +21,7 @@ services:
     volumes:
       - ./scripts:/scripts
       - ${MONGO_PATH}/shard-1/db:/data/db
+      - ${MONGO_PATH}/shard-1/configdb:/data/configdb
     ports:
       - 27018:27017
     entrypoint: ["mongod", "--port", "27017", "--shardsvr", "--replSet", "shard-rs-1", "--bind_ip_all"]
@@ -31,6 +33,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: 123456
     volumes:
       - ./scripts:/scripts
+      - ${MONGO_PATH}/config-0/db:/data/db
       - ${MONGO_PATH}/config-0/configdb:/data/configdb
     ports:
       - 27019:27017
@@ -46,6 +49,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: 123456
     volumes:
       - ./scripts:/scripts
+      - ${MONGO_PATH}/router-0/db:/data/db
+      - ${MONGO_PATH}/router-0/configdb:/data/configdb
     ports:
       - 27020:27017
     entrypoint: ["mongos", "--port", "27017", "--configdb", "config-rs/config-0:27017", "--bind_ip_all"]
